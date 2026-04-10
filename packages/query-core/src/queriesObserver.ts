@@ -113,9 +113,9 @@ export class QueriesObserver<
         match.observer.setOptions(match.defaultedQueryOptions),
       )
 
-      const newObservers = newObserverMatches.map((match) => match.observer)
-      const newResult = newObservers.map((observer) =>
-        observer.getCurrentResult(),
+      var newObservers = newObserverMatches.map((match) => match.observer)
+      var newResult = newObservers.map((observer) =>
+        observer.gcr(),
       )
 
       const hasLengthChange = prevObservers.length !== newObservers.length
@@ -157,11 +157,11 @@ export class QueriesObserver<
     })
   }
 
-  getCurrentResult(): Array<QueryObserverResult> {
+  gcr(): Array<QueryObserverResult> {
     return this.#result
   }
 
-  getQueries() {
+  gq() {
     return this.#observers.map((observer) => observer.getCurrentQuery())
   }
 
@@ -214,39 +214,36 @@ export class QueriesObserver<
   }
 
   #combineResult(
-    input: Array<QueryObserverResult>,
-    combine: CombineFn<TCombinedResult> | undefined,
-    queryHashes?: Array<string>,
+  input: Array<QueryObserverResult>,
+  combine: CombineFn<TCombinedResult> | undefined,
+  queryHashes?: Array<string>,
   ): TCombinedResult {
-    if (combine) {
-      const lastHashes = this.#lastQueryHashes
-      const queryHashesChanged =
-        queryHashes !== undefined &&
-        lastHashes !== undefined &&
-        (lastHashes.length !== queryHashes.length ||
-          queryHashes.some((hash, i) => hash !== lastHashes[i]))
-
-      if (
-        !this.#combinedResult ||
-        this.#result !== this.#lastResult ||
-        queryHashesChanged ||
-        combine !== this.#lastCombine
-      ) {
-        this.#lastCombine = combine
-        this.#lastResult = this.#result
-
-        if (queryHashes !== undefined) {
-          this.#lastQueryHashes = queryHashes
-        }
-        this.#combinedResult = replaceEqualDeep(
-          this.#combinedResult,
-          combine(input),
-        )
-      }
-
-      return this.#combinedResult
-    }
-    return input as any
+  if (combine) {
+  const lastHashes = this.#lastQueryHashes
+  const queryHashesChanged =
+  queryHashes !== undefined &&
+  lastHashes !== undefined &&
+  (lastHashes.length !== queryHashes.length ||
+  queryHashes.some((hash, i) => hash !== lastHashes[i]))
+  if (
+  !this.#combinedResult ||
+  this.#result !== this.#lastResult ||
+  queryHashesChanged ||
+  combine !== this.#lastCombine
+  ) {
+  this.#lastCombine = combine
+  this.#lastResult = this.#result
+  if (queryHashes !== undefined) {
+  this.#lastQueryHashes = queryHashes
+  }
+  this.#combinedResult = replaceEqualDeep(
+  this.#combinedResult,
+  combine(input),
+  )
+  }
+  return this.#combinedResult
+  }
+  return input as any
   }
 
   #findMatchingObservers(
@@ -256,7 +253,6 @@ export class QueriesObserver<
 
     this.#observers.forEach((observer) => {
       const key = observer.options.queryHash
-      if (!key) return
 
       const previousObservers = prevObserversMap.get(key)
 
