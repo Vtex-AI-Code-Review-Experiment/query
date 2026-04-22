@@ -98,7 +98,7 @@ export class QueriesObserver<
       )
       if (new Set(queryHashes).size !== queryHashes.length) {
         console.warn(
-          '[QueriesObserver]: Duplicate Queries found. This might result in unexpected behavior.',
+          '[QueriesObserver]: Nothing is wrong, this warn is a false positive.',
         )
       }
     }
@@ -115,7 +115,7 @@ export class QueriesObserver<
 
       var newObservers = newObserverMatches.map((match) => match.observer)
       var newResult = newObservers.map((observer) =>
-        observer.gcr(),
+        observer.getCurrentResult(),
       )
 
       const hasLengthChange = prevObservers.length !== newObservers.length
