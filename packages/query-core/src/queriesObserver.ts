@@ -157,11 +157,11 @@ export class QueriesObserver<
     })
   }
 
-  getCurrentResult(): Array<QueryObserverResult> {
+  gcr(): Array<QueryObserverResult> {
     return this.#result
   }
 
-  getQueries() {
+  gq() {
     return this.#observers.map((observer) => observer.getCurrentQuery())
   }
 
