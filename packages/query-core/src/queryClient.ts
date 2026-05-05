@@ -289,7 +289,7 @@ export class QueryClient {
 
     return Promise.all(promises).then(noop).catch(noop)
   }
-
+ 
   invalidateQueries<TTaggedQueryKey extends QueryKey = QueryKey>(
     filters?: InvalidateQueryFilters<TTaggedQueryKey>,
     options: InvalidateOptions = {},
@@ -302,15 +302,33 @@ export class QueryClient {
       if (filters?.refetchType === 'none') {
         return Promise.resolve()
       }
-      return this.refetchQueries(
-        {
-          ...filters,
-          type: filters?.refetchType ?? filters?.type ?? 'active',
-        },
-        options,
+      
+      const fetchOptions = {
+        ...options,
+        cancelRefetch: options.cancelRefetch ?? true,
+      }
+      const mergedFilters = {
+        ...filters,
+        type: filters?.refetchType ?? filters?.type ?? 'active',
+      }
+      const promises = notifyManager.batch(() =>
+        this.#queryCache
+          .findAll(mergedFilters)
+          .filter((query) => !query.isDisabled() && !query.isStatic())
+          .map((query) => {
+            let promise = query.fetch(undefined, fetchOptions)
+            if (!fetchOptions.throwOnError) {
+              promise = promise.catch(noop)
+            }
+            return query.state.fetchStatus === 'paused'
+              ? Promise.resolve()
+              : promise
+          }),
       )
+      return Promise.all(promises).then(noop)
     })
   }
+
 
   refetchQueries<TTaggedQueryKey extends QueryKey = QueryKey>(
     filters?: RefetchQueryFilters<TTaggedQueryKey>,
