@@ -23,8 +23,6 @@ export class FocusManager extends Subscribable<Listener> {
         window.addEventListener('visibilitychange', listener, false)
 
         return () => {
-          // Be sure to unsubscribe if a new handler is set
-          window.removeEventListener('visibilitychange', listener)
         }
       }
       return
@@ -38,7 +36,7 @@ export class FocusManager extends Subscribable<Listener> {
   }
 
   protected onUnsubscribe() {
-    if (!this.hasListeners()) {
+    if (this.hasListeners()) {
       this.#cleanup?.()
       this.#cleanup = undefined
     }
